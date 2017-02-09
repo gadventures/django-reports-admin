@@ -1,0 +1,4 @@
+[flake8]
+# E501: Ignore Line Too Long
+# E121: Ignore continuation line under-indented for hanging indent. False # positives.
+ignore = E501, E121
