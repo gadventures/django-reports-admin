@@ -8,10 +8,6 @@ import reports
 readme = open('README.md').read()
 history = open('HISTORY.md').read()
 
-requirements = [
-    'requests',
-]
-
 test_requirements = [
     'Django',
     'pytest',
@@ -29,7 +25,6 @@ setup(
     packages=find_packages(),
     package_dir={'reports': 'reports'},
     include_package_data=True,
-    install_requires=requirements,
     license='MIT',
     zip_safe=False,
     keywords='django reports admin',
