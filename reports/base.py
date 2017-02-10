@@ -1,7 +1,8 @@
-import io
 from datetime import datetime
-import logging
 import collections
+import csv
+import io
+import logging
 
 from django.template.defaultfilters import slugify
 from django.contrib.contenttypes.models import ContentType
@@ -12,7 +13,6 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 from reports.tasks import report_task
-from reports.csv_unicodewriter import CSVUnicodeWriter
 
 
 logger = logging.getLogger(__name__)
@@ -125,7 +125,9 @@ class ModelReport(object):
             'app_label': model._meta.app_label,
             'model_name': model._meta.object_name,
         }
-        report_task.delay(**params)
+        # report_task.delay(**params)
+        report = self.__class__(**params)
+        report.run_report()
 
     def run_report(self):
         '''
@@ -135,7 +137,7 @@ class ModelReport(object):
             self.collect_data()
             output = self.generate_output()
             saved_report = self.save(output)
-        except Exception:
+        except Exception as exc:
             # We've done something wrong! Alert us beyond just Sentry and send
             # the user an email so they're not left wondering.
             logger.error('Failed to run report', exc_info=True)
@@ -150,7 +152,7 @@ class ModelReport(object):
             '{} - {} - FAILED'.format(self.name, self.model_name),
             'Websupport has been sent this email to investigate.',
             'noreply@gadventures.com',
-            settings.STAFF_EMAILS['websupport'] + (self.get_user_email(),),
+            [self.get_user_email(),],
         )
 
     def send_success_notification(self, download_url):
@@ -160,7 +162,7 @@ class ModelReport(object):
         send_mail(
             '{} - {} - Complete'.format(self.name, self.model_name),
             message,
-            'noreply@gadventures.com',
+            settings.DEFAULT_FROM_EMAIL,
             [self.get_user_email()],
         )
 
@@ -219,11 +221,15 @@ class ModelReport(object):
         return User.objects.get(id=self.user_id)
 
     def get_user_email(self):
+        """
+        By default, attempt to fetch email of active admin user, otherwise
+        fallback to use settings.ADMINS
+        """
         try:
             return self.get_user().email
         except User.DoesNotExist:
             logger.warning('User not set for report notification')
-            return settings.STAFF_EMAILS['websupport'][0]
+            return [email for name, email in settings.ADMINS]
 
     def save(self, output):
         '''
@@ -302,7 +308,7 @@ class ModelReport(object):
 
         fields = self.get_fields()
         output = io.StringIO()
-        csv_writer = CSVUnicodeWriter(output)
+        csv_writer = csv.writer(output)
         csv_writer.writerow(self.fields)
         for row in self.data:
             try:
@@ -377,16 +383,20 @@ class Reports(object):
         return registry
     registry = property(_get_registry)
 
-    def autodiscover(self):
+    def discover(self):
         """
-        Auto-discover INSTALLED_APPS reports.py modules and fail silently when
+        Discover INSTALLED_APPS reports.py modules and fail silently when
         not present. This forces an import on them to register any report
         configuration.
 
-        This should be called in a place that's loaded once, e.g. urls.py
+        This should be called in a place that's loaded once. It is recommended
+        this lives within an AppConfig, e.g.
 
-        from reports import reports
-        reports.autodiscover()
+        class ReportConfig(AppConfig):
+
+            def ready(self):
+                from .base import reports
+                reports.discover()
         """
         from importlib import import_module
         from django.conf import settings
@@ -412,7 +422,7 @@ class Reports(object):
         Register the actions for each model
         '''
         from django.contrib import admin
-        for model, model_admin in admin.site._registry.iteritems():
+        for model, model_admin in admin.site._registry.items():
             if model not in self.registry:
                 continue
 
