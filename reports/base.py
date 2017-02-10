@@ -9,7 +9,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from django.template.defaultfilters import title
 from django.apps import apps
-from django.core.mail import send_mail
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -95,12 +94,6 @@ class ModelReport(object):
             model_admin.message_user(request, 'This report is limited to %s records.' % self.max_records)
             return False
 
-        model_admin.message_user(
-            request,
-            'Your report has been scheduled to run. You will receive an email\
-            once it is complete'
-        )
-
         model = queryset.model
         # Simplify the query to an id__in lookup. The queryset must
         # be evaluated via `list` to avoid pickling issues which is necessary
@@ -122,42 +115,44 @@ class ModelReport(object):
             'model_name': model._meta.object_name,
         }
         report = self.__class__(**params)
-        report.run_report()
 
-    def run_report(self):
+        try:
+            saved_report = report.run_report(model_admin, request)
+        except Exception as exc:
+            logger.error('Failed to run report', exc_info=True)
+            model_admin.message_user(
+                request,
+                "Your report could not be compiled. Please check the error logs or contact your administrator."
+            )
+            self.send_success_notification()
+        else:
+            logger.debug('Sending report email notification')
+            model_admin.message_user(
+                request,
+                "Your report has completed and is availabled within the <em>{0}</em> section of the admin. Or, you can download it directly <a href='{1}'>here</a>".format(apps.get_app_config('reports').verbose_name, saved_report.report_file.url)
+            )
+            self.send_error_notification()
+
+    def run_report(self, model_admin, request):
         '''
         Default method responsible for generating the output of this report.
         '''
-        try:
-            self.collect_data()
-            output = self.generate_output()
-            saved_report = self.save(output)
-        except Exception as exc:
-            # We've done something wrong! Alert us beyond just Sentry and send
-            # the user an email so they're not left wondering.
-            logger.error('Failed to run report', exc_info=True)
-            self.send_error_notification()
-        else:
-            logger.debug('Sending report email notification')
-            self.send_success_notification(saved_report.report_file.url)
-            return saved_report
+        self.collect_data()
+        output = self.generate_output()
+        saved_report = self.save(output)
+        return saved_report
 
     def send_error_notification(self):
-        send_mail(
-            '{} - {} - FAILED'.format(self.name, self.model_name),
-            'Websupport has been sent this email to investigate.',
-            'noreply@gadventures.com',
-            [self.get_user_email(),],
-        )
+        """
+        Hook to deliver a notification of failed report compilation
+        """
+        pass
 
-    def send_success_notification(self, download_url):
-        message = 'Download Report: {}'.format(download_url)
-        send_mail(
-            '{} - {} - Complete'.format(self.name, self.model_name),
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [self.get_user_email()],
-        )
+    def send_success_notification(self, saved_report):
+        """
+        Hook to deliver a notification of success when a report has been saved.
+        """
+        pass
 
     def collect_data(self):
         '''

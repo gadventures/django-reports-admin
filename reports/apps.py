@@ -7,5 +7,4 @@ class ReportConfig(AppConfig):
 
     def ready(self):
         from .base import reports
-        print("Registering..")
         reports.discover()
