@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.files.base import ContentFile
-from django.urls import reverse
 from django.db import models
+from django.urls import reverse
 
 REPORTS_FOLDER = getattr(settings, 'REPORTS_FOLDER', 'reports')
 

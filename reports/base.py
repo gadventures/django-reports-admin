@@ -12,9 +12,6 @@ from django.apps import apps
 from django.core.mail import send_mail
 from django.conf import settings
 
-from reports.tasks import report_task
-
-
 logger = logging.getLogger(__name__)
 EMPTY_DATA_XML = '<report/>'
 
@@ -44,9 +41,8 @@ class ModelReport(object):
                     -> get_fields
             -> save | download
 
-    The django admin calls this class, which spawns a celery task, which
-    in turn re-instantiates this class to run the report. It's the circle
-    of life.
+    The django admin calls this class, which re-instantiates this
+    class to run the report. It's the circle of life.
     '''
     # Name that appears in the admin action dropdown for generating the report
     name = 'Report - Export Selected'
@@ -125,7 +121,6 @@ class ModelReport(object):
             'app_label': model._meta.app_label,
             'model_name': model._meta.object_name,
         }
-        # report_task.delay(**params)
         report = self.__class__(**params)
         report.run_report()
 
@@ -156,8 +151,6 @@ class ModelReport(object):
         )
 
     def send_success_notification(self, download_url):
-        if 'http' not in download_url:
-            download_url = 'http:{}'.format(download_url)
         message = 'Download Report: {}'.format(download_url)
         send_mail(
             '{} - {} - Complete'.format(self.name, self.model_name),
