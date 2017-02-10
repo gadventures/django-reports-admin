@@ -124,14 +124,15 @@ class ModelReport(object):
                 request,
                 "Your report could not be compiled. Please check the error logs or contact your administrator."
             )
-            self.send_success_notification()
+            self.send_error_notification()
         else:
             logger.debug('Sending report email notification')
             model_admin.message_user(
                 request,
-                "Your report has completed and is availabled within the <em>{0}</em> section of the admin. Or, you can download it directly <a href='{1}'>here</a>".format(apps.get_app_config('reports').verbose_name, saved_report.report_file.url)
+                "Your report has completed and is available within the <em>{0}</em> section of the admin. Or, you can download it directly <a href='{1}'>here</a>".format(apps.get_app_config('reports').verbose_name, saved_report.report_file.url),
+                extra_tags='safe',
             )
-            self.send_error_notification()
+            self.send_success_notification(saved_report)
 
     def run_report(self, model_admin, request):
         '''
