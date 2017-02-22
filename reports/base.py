@@ -1,5 +1,6 @@
+from collections import OrderedDict
 from datetime import datetime
-import collections
+from typing import List
 import csv
 import io
 import logging
@@ -171,7 +172,7 @@ class ModelReport(object):
         """
         pass
 
-    def collect_data(self):
+    def collect_data(self) -> List[OrderedDict]:
         '''
         Collect the rows of data for the report
         '''
@@ -189,7 +190,7 @@ class ModelReport(object):
         `obj`
             A data object from the `objects` list passed to generate()
         '''
-        data = collections.OrderedDict()
+        data = OrderedDict()
         field_lookups = self.get_field_lookups()
         for field, value in field_lookups:
             # Send the object to any callable
@@ -203,7 +204,7 @@ class ModelReport(object):
                 data[field] = value
         return data
 
-    def generate_output(self):
+    def generate_output(self) -> io.StringIO:
         '''
         By default generates and returns CSV output.
         '''
@@ -304,7 +305,7 @@ class ModelReport(object):
         self.field_lookups = [(title(field), field) for field in self._get_model_fields()]
         return self.field_lookups
 
-    def as_csv(self):
+    def as_csv(self) -> io.StringIO:
         '''
         Return report as a string of comma separated values
         '''

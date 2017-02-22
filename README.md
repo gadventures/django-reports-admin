@@ -63,6 +63,31 @@ sufficient.
 `generate_output` can be modified to adjust the type of output. By default, a
 CSV file is generated.
 
+## Usage In Shell And Tests
+
+It may be useful for you to test a report via code, either as a test or a quick
+shell script. This is done without much stress:
+
+    # Assuming a defined ModelReport
+    from reports.base import ModelReport
+    from .models import MyModel
+
+    class MyReport(ModelReport):
+        queryset = MyModel.objects.all()
+
+    # Instantiate the report, and run it through various means
+
+    report = MyReport()
+
+    # Create a SavedReport instance
+    report.run_report()
+
+    # Raw output of the report (as CSV, by default)
+    report.generate_output()
+
+    # Output list of OrderedDicts
+    report.collect_data()
+
 
 ## Testing
 
