@@ -11,6 +11,8 @@ from django.template.defaultfilters import title
 from django.apps import apps
 from django.conf import settings
 
+from .models import SavedReport
+
 logger = logging.getLogger(__name__)
 EMPTY_DATA_XML = '<report/>'
 
@@ -67,6 +69,11 @@ class ModelReport(object):
     # The rows of data populated by `generate`
     data = []
 
+    # A ModelReport can be populated by default, with a queryset. Although usage
+    # within the admin will override this, it can be useful for testing within a
+    # Python environment (shell/tests) to define this attribute
+    queryset = None
+
     def __init__(self, *args, **kwargs):
         # Make the django admin shows a nice name...
         self.short_description = self.__name__ = self.name
@@ -77,6 +84,15 @@ class ModelReport(object):
         self.query = kwargs.get('query')
         self.app_label = kwargs.get('app_label')
         self.model_name = kwargs.get('model_name')
+
+        # If the admin has not defined a query through __call__, use the defined
+        # `queryset` attribute.
+        if self.query is None and self.queryset is not None:
+            self.query = self.queryset.query
+
+            model = self.queryset.model
+            self.model_name = model._meta.model_name
+            self.app_label = model._meta.app_label
 
     def __call__(self, model_admin, request, queryset, **kwargs):
         '''
@@ -117,7 +133,7 @@ class ModelReport(object):
         report = self.__class__(**params)
 
         try:
-            saved_report = report.run_report(model_admin, request)
+            saved_report = report.run_report()
         except Exception as exc:
             logger.error('Failed to run report', exc_info=True)
             model_admin.message_user(
@@ -134,7 +150,7 @@ class ModelReport(object):
             )
             self.send_success_notification(saved_report)
 
-    def run_report(self, model_admin, request):
+    def run_report(self) -> SavedReport:
         '''
         Default method responsible for generating the output of this report.
         '''
@@ -207,6 +223,8 @@ class ModelReport(object):
         return qs
 
     def get_user(self):
+        if self.user_id is None:
+            return
         return User.objects.get(id=self.user_id)
 
     def get_user_email(self):
@@ -220,7 +238,7 @@ class ModelReport(object):
             logger.warning('User not set for report notification')
             return [email for name, email in settings.ADMINS]
 
-    def save(self, output):
+    def save(self, output) -> SavedReport:
         '''
         Save the report to disk
 
@@ -228,7 +246,6 @@ class ModelReport(object):
             Send an email to the user notifying them that their report
             is complete.
         '''
-        from reports.models import SavedReport
         user = self.get_user()
         saved = SavedReport.objects.create(report=self.name, run_by=user)
         saved.save_file(output, self.get_filename())

@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.core.files.base import ContentFile
 from django.db import models
 from django.urls import reverse
 
@@ -21,6 +20,7 @@ class SavedReport(models.Model):
         return reverse('admin:reports_savedreport_change', args=[self.id])
 
     def save_file(self, content, filename):
+        from django.core.files.base import ContentFile
         f = ContentFile(content)
         f.name = filename
         self.report_file = f
