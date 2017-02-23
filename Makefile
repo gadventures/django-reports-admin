@@ -3,4 +3,4 @@ help:
 
 
 test:
-	pytest --ds=tests.testapp.settings
+	pytest --ds=tests.testapp.settings -v

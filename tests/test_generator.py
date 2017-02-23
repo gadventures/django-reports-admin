@@ -26,7 +26,4 @@ class CSVGeneratorTest(TestCase):
 
         expected_output = u'Field 1,Field 2,Field 3\r\n1,data,data\r\n1,data,data\r\n'
 
-        print(output)
-        print(expected_output)
-
         assert output == expected_output
