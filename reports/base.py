@@ -85,6 +85,7 @@ class ModelReport(object):
         self.query = kwargs.get('query')
         self.app_label = kwargs.get('app_label')
         self.model_name = kwargs.get('model_name')
+        self.queryset = kwargs.get('queryset')
 
         # If the admin has not defined a query through __call__, use the defined
         # `queryset` attribute.
