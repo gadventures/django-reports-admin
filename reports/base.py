@@ -82,19 +82,44 @@ class ModelReport(object):
         # These properties are populated when the class is called,
         # via the django admin (see __call__)
         self.user_id = kwargs.get('user_id')
-        self.query = kwargs.get('query')
         self.app_label = kwargs.get('app_label')
         self.model_name = kwargs.get('model_name')
-        self.queryset = kwargs.get('queryset')
+        self.queryset = kwargs.get('queryset', self.queryset)
 
         # If the admin has not defined a query through __call__, use the defined
         # `queryset` attribute.
-        if self.query is None and self.queryset is not None:
+        if self.queryset is not None:
             self.query = self.queryset.query
 
             model = self.queryset.model
             self.model_name = model._meta.model_name
             self.app_label = model._meta.app_label
+
+    def get_report_params(self, request, queryset):
+        """
+        Return the parameters that will be used to instantiate this report
+        """
+        model = queryset.model
+        # Simplify the query to an id__in lookup. The queryset must
+        # be evaluated via `list` to avoid pickling issues which is necessary
+        # for running as a task.
+        pks = list(queryset.values_list('pk', flat=True))
+        queryset = model.objects.filter(pk__in=pks)
+
+        # Create an instance of this class so we're threadsafe-ish
+        # Use simple data structures so that it pickles nicely when
+        # run as a task. It's better to pickle the QuerySet.query rather
+        # than the entire QuerySet, as all of the data/rows would be evaluated
+        # and passed to the task (bad news bears); `get_queryset` recreates the
+        # full queryset when the report runs.
+        params = {
+            'report_class': self.__class__,
+            'user_id': request.user.id,
+            'queryset': queryset,
+            'app_label': model._meta.app_label,
+            'model_name': model._meta.object_name,
+        }
+        return params
 
     def __call__(self, model_admin, request, queryset, **kwargs):
         '''
@@ -112,45 +137,21 @@ class ModelReport(object):
             model_admin.message_user(request, 'This report is limited to %s records.' % self.max_records)
             return False
 
-        model = queryset.model
-        # Simplify the query to an id__in lookup. The queryset must
-        # be evaluated via `list` to avoid pickling issues which is necessary
-        # for running as a task.
-        pks = list(queryset.values_list('pk', flat=True))
-        queryset = model.objects.filter(pk__in=pks)
+        # Bind request so we're not passing it around through various hook functions
+        self.request = request
 
-        # Create an instance of this class so we're threadsafe-ish
-        # Use simple data structures so that it pickles nicely when
-        # run as a task. It's better to pickle the QuerySet.query rather
-        # than the entire QuerySet, as all of the data/rows would be evaluated
-        # and passed to the task (bad news bears); `get_queryset` recreates the
-        # full queryset when the report runs.
-        params = {
-            'report_class': self.__class__,
-            'user_id': request.user.id,
-            'query': queryset.query,
-            'app_label': model._meta.app_label,
-            'model_name': model._meta.object_name,
-        }
+        params = self.get_report_params(request, queryset)
         report = self.__class__(**params)
 
         try:
             saved_report = report.run_report()
         except Exception as exc:
             logger.error('Failed to run report', exc_info=True)
-            model_admin.message_user(
-                request,
-                "Your report could not be compiled. Please check the error logs or contact your administrator."
-            )
-            self.send_error_notification()
+            self.send_error_notification(model_admin)
         else:
-            logger.debug('Sending report email notification')
-            model_admin.message_user(
-                request,
-                "Your report has completed and is available within the <em>{0}</em> section of the admin. Or, you can download it directly <a href='{1}'>here</a>".format(apps.get_app_config('reports').verbose_name, saved_report.report_file.url),
-                extra_tags='safe',
-            )
-            self.send_success_notification(saved_report)
+            self.send_success_notification(model_admin, saved_report=saved_report)
+
+        return saved_report
 
     def run_report(self) -> SavedReport:
         '''
@@ -161,17 +162,26 @@ class ModelReport(object):
         saved_report = self.save(output)
         return saved_report
 
-    def send_error_notification(self):
+    def send_error_notification(self, model_admin):
         """
         Hook to deliver a notification of failed report compilation
         """
-        pass
+        model_admin.message_user(
+            self.request,
+            "Your report could not be compiled. Please check the error logs or contact your administrator."
+        )
 
-    def send_success_notification(self, saved_report):
+    def send_success_notification(self, model_admin, saved_report=None):
         """
         Hook to deliver a notification of success when a report has been saved.
         """
-        pass
+        if saved_report is None:
+            return
+        model_admin.message_user(
+            self.request,
+            "Your report has completed and is available within the <em>{0}</em> section of the admin. Or, you can download it directly <a href='{1}'>here</a>".format(apps.get_app_config('reports').verbose_name, saved_report.report_file.url),
+            extra_tags='safe',
+        )
 
     def collect_data(self) -> List[OrderedDict]:
         '''
@@ -372,6 +382,7 @@ class Reports(object):
         `model`
             The model for which the report can be run. If None, the report
             will be available for ALL models (global action).
+
         `report_class`
             The class that will be instantiated for running the report via
             it's `run_report` method. Should inherit from ModelReport.
