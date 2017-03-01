@@ -148,6 +148,7 @@ class ModelReport(object):
         except Exception as exc:
             logger.error('Failed to run report', exc_info=True)
             self.send_error_notification(model_admin)
+            return
         else:
             self.send_success_notification(model_admin, saved_report=saved_report)
 
