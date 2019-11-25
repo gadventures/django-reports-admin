@@ -10,7 +10,7 @@ class SavedReport(models.Model):
     Contains instances of saved reports, and ensures they are written to a file.
     """
     report = models.CharField(max_length=255, null=True, blank=False)
-    run_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True)
+    run_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)
     report_file = models.FileField(upload_to=REPORTS_FOLDER)
 
     date_modified = models.DateTimeField(auto_now=True)
