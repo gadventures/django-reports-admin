@@ -1,6 +1,16 @@
 Changelog
 =========
 
+1.1.0 (2021-02-06)
+------------------
+
+* 58bece6_ - Migration for change to ``SavedReport.run_by``
+* fae699c_ - Full code base format + commit of change to ``SavedReport.run_by``.
+  Modified to add the ``on_delete=models.SET_NULL``
+
+.. _58bece6: https://github.com/gadventures/django-reports-admin/commit/58bece6
+.. _fae699c: https://github.com/gadventures/django-reports-admin/commit/fae699c
+
 1.0.4 (2017-02-28)
 ------------------
 
