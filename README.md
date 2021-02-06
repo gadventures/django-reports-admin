@@ -1,25 +1,31 @@
 # django-reports-admin
 
-A Django Admin add-on which adds functionality to export data in customized forms of output,
+A Django Admin add-on which adds functionality to export data in customized
+forms of output.
 
 ## Requirements
 
-Django Reports Admin requires Django 1.10 or later, and is written for Python 3.5 or later.
+Django Reports Admin requires `Django 1.10` or later, and is written for
+`Python 3.5` or later.
 
 ## Installation
 
+**NOTE:** Although enabled by default, you'll want to ensure that
+`django.contrib.contenttypes` is within `INSTALLED_APPS`.
+
+    ```sh
     pip install django-reports-admin
+    ```
 
 Then, amend your Django `settings.py` file:
 
+    ```python
     INSTALLED_APPS = (
       ...
       'reports',
       ...
     )
-
-Although enabled by default, you'll want to ensure
-`django.contrib.contenttypes`` is within `INSTALLED_APPS`.
+    ```
 
 ## Usage
 
@@ -27,6 +33,7 @@ Creating reports requires subclassing the `ModelReport` class and identifying a
 report. This can be done with a few lines of code if you simply want to extract
 the admin list view for verbatim. For example:
 
+    ```python
     # This file can be named anything, but it lives well within the admin.py or
     # models.py as it'll ensure your register() command is run.
     # yourapp/reports.py -- This file can be named anything
@@ -35,15 +42,18 @@ the admin list view for verbatim. For example:
 
     class MyReport(ModelReport)
         name = "Report - My Report"
+    ```
 
 Then, register the `ModelReport` against a model:
 
+    ```python
     # yourapp/admin.py
 
     from .reports import MyReport
     from .models import MyModel
 
     reports.register(MyModel, MyReport)
+    ```
 
 Upon registration, you'll see a new action with the Django Admin for that Model,
 with whatever name you've provided in the `name` attribute.
@@ -68,6 +78,7 @@ CSV file is generated.
 It may be useful for you to test a report via code, either as a test or a quick
 shell script. This is done without much stress:
 
+    ```python
     # Assuming a defined ModelReport
     from reports.base import ModelReport
     from .models import MyModel
@@ -87,11 +98,13 @@ shell script. This is done without much stress:
 
     # Output list of OrderedDicts
     report.collect_data()
-
+    ```
 
 ## Testing
 
 Tests are run using `pytest`, and the test suite can be executed using the
 MakeFile
 
+    ```sh
     make test
+    ```
