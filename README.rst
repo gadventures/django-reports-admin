@@ -20,7 +20,7 @@ Installation
 
    pip install django-reports-admin
 
-Then, amend your Django ``settings.py`` file:
+Then, amend your Django ``settings.INSTALLED_APPS``:
 
 .. code:: python
 
