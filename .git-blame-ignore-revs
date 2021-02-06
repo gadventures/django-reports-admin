@@ -1,0 +1,13 @@
+# This file contains a list of commits that should be ignored when git-blame is
+# used. One example are commits that automatically format code without making
+# any functional changes: they are usually not helpful when blaming a file to
+# find out about the context of a given line.
+#
+# The path to this file can be passed to the `ignore-revs-file` argument of
+# git-blame. If you want the following commits to be automatically ignore, you
+# can set the blame.ignoreRevsFile config option:
+#
+#     $ git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# [2021-02-06] formatting comit (with black)
+fae699c66127a9db0b37e213125469290fee9169
