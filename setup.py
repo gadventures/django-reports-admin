@@ -9,9 +9,9 @@ readme = open("README.md").read()
 history = open("HISTORY.md").read()
 
 test_requirements = [
-    "Django",
-    "pytest",
-    "pytest-django",
+    "Django==1.10.8",
+    "pytest==3.0.6",
+    "pytest-django==3.1.2",
 ]
 
 setup(
