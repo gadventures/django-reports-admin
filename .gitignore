@@ -1,2 +1,9 @@
+# folders
+__pycache__/
+
+# extensions
+*.pyc
+
+# test files
 coverage.xml
 junit.xml
