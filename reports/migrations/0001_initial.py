@@ -13,17 +13,25 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='SavedReport',
+            name="SavedReport",
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('date_modified', models.DateTimeField(auto_now=True)),
-                ('date_created', models.DateTimeField(auto_now_add=True)),
-                ('report', models.CharField(max_length=255, null=True)),
-                ('report_file', models.FileField(upload_to=b'dynamic/admin/reports')),
-                ('run_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        verbose_name="ID",
+                        serialize=False,
+                        auto_created=True,
+                        primary_key=True,
+                    ),
+                ),
+                ("date_modified", models.DateTimeField(auto_now=True)),
+                ("date_created", models.DateTimeField(auto_now_add=True)),
+                ("report", models.CharField(max_length=255, null=True)),
+                ("report_file", models.FileField(upload_to=b"dynamic/admin/reports")),
+                ("run_by", models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
             bases=(models.Model,),
         ),

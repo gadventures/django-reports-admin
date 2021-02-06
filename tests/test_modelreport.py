@@ -15,17 +15,21 @@ class ModelReportTest(TestCase):
         class FooReport(ModelReport):
             queryset = ReportTestModel.objects.all()
 
-        ReportTestModel.objects.create(name='Name 1')
-        ReportTestModel.objects.create(name='Name 2')
+        ReportTestModel.objects.create(name="Name 1")
+        ReportTestModel.objects.create(name="Name 2")
 
         report = FooReport()
         assert report.collect_data() == [
-            OrderedDict([
-                ('Id', 1),
-                ('Name', 'Name 1'),
-            ]),
-            OrderedDict([
-                ('Id', 2),
-                ('Name', 'Name 2'),
-            ]),
+            OrderedDict(
+                [
+                    ("Id", 1),
+                    ("Name", "Name 1"),
+                ]
+            ),
+            OrderedDict(
+                [
+                    ("Id", 2),
+                    ("Name", "Name 2"),
+                ]
+            ),
         ]

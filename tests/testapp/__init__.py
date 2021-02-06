@@ -1,2 +1,2 @@
 # -*- coding: utf-8 -*-
-default_app_config = 'tests.testapp.apps.TestAppConfig'
+default_app_config = "tests.testapp.apps.TestAppConfig"

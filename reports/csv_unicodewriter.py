@@ -8,9 +8,9 @@ from django.utils.encoding import smart_text
 class CSVUnicodeWriter(object):
     # Derived from http://djangosnippets.org/snippets/993/
     def __init__(self, f, dialect=csv.excel_tab, encoding="utf-16", **kwds):
-        # Redirect output to a queue
-        self.queue = io.StringIO()
-        self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
+        # Redirect output to a buffer
+        self.buffer = io.StringIO()
+        self.writer = csv.writer(self.buffer, dialect=dialect, **kwds)
         self.stream = f
 
         # Force BOM
@@ -22,8 +22,8 @@ class CSVUnicodeWriter(object):
     def writerow(self, row):
         # Modified from original: now using unicode(s) to deal with e.g. ints
         self.writer.writerow([smart_text(s).encode("utf-8") for s in row])
-        # Fetch UTF-8 output from the queue ...
-        data = self.queue.getvalue()
+        # Fetch UTF-8 output from the buffer ...
+        data = self.buffer.getvalue()
         data = data.decode("utf-8")
         # ... and reencode it into the target encoding
         data = data.encode(self.encoding)
@@ -34,5 +34,5 @@ class CSVUnicodeWriter(object):
 
         # write to the target stream
         self.stream.write(data)
-        # empty queue
-        self.queue.truncate(0)
+        # empty buffer
+        self.buffer.truncate(0)
