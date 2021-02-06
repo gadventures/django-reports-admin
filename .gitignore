@@ -4,6 +4,7 @@ __pycache__/
 # extensions
 *.pyc
 
-# test files
+# files
+pylint.report
 coverage.xml
 junit.xml
