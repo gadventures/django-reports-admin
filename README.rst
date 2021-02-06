@@ -1,13 +1,16 @@
 django-reports-admin
 ====================
 
-A Django Admin add-on which adds functionality to export data in
-customized forms of output.
+.. image:: https://badge.fury.io/py/django-reports-admin.svg
+    :target: http://badge.fury.io/py/django-reports-admin
+
+A Django Admin add-on which adds functionality to export data in customised
+forms of output.
 
 Requirements
 ------------
 
-Django Reports Admin requires ``Django 1.10`` or later, and is written
+Django Reports Admin requires ``Django 1.10.8`` or later, and is written
 for ``Python 3.5`` or later.
 
 Installation
