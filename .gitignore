@@ -1,10 +1,7 @@
 # folders
 __pycache__/
+dist
+django_reports_admin.egg-info/
 
 # extensions
 *.pyc
-
-# files
-pylint.report
-coverage.xml
-junit.xml

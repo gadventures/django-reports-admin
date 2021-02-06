@@ -5,8 +5,8 @@ from setuptools import setup, find_packages
 
 import reports
 
-readme = open("README.md").read()
-history = open("HISTORY.md").read()
+readme = open("README.rst").read()
+history = open("HISTORY.rst").read()
 
 test_requirements = [
     "Django==1.10.8",
@@ -19,6 +19,7 @@ setup(
     version=reports.__version__,
     description="A Django Admin add-on which adds functionality to export data in customized forms of output.",
     long_description=readme + "\n\n" + history,
+    long_description_content_type="text/x-rst",
     author="G Adventures",
     author_email="software@gadventures.com",
     url="https://github.com/gadventures/django-reports-admin",
