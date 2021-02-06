@@ -13,19 +13,19 @@ Django Reports Admin requires `Django 1.10` or later, and is written for
 **NOTE:** Although enabled by default, you'll want to ensure that
 `django.contrib.contenttypes` is within `INSTALLED_APPS`.
 
-    ```sh
-    pip install django-reports-admin
-    ```
+```sh
+pip install django-reports-admin
+```
 
 Then, amend your Django `settings.py` file:
 
-    ```python
-    INSTALLED_APPS = (
-      ...
-      'reports',
-      ...
-    )
-    ```
+```python
+INSTALLED_APPS = (
+    ...
+    'reports',
+    ...
+)
+```
 
 ## Usage
 
@@ -33,27 +33,27 @@ Creating reports requires subclassing the `ModelReport` class and identifying a
 report. This can be done with a few lines of code if you simply want to extract
 the admin list view for verbatim. For example:
 
-    ```python
-    # This file can be named anything, but it lives well within the admin.py or
-    # models.py as it'll ensure your register() command is run.
-    # yourapp/reports.py -- This file can be named anything
+```python
+# This file can be named anything, but it lives well within the admin.py or
+# models.py as it'll ensure your register() command is run.
+# yourapp/reports.py -- This file can be named anything
 
-    from reports.base import ModelReport
+from reports.base import ModelReport
 
-    class MyReport(ModelReport)
-        name = "Report - My Report"
-    ```
+class MyReport(ModelReport)
+    name = "Report - My Report"
+```
 
 Then, register the `ModelReport` against a model:
 
-    ```python
-    # yourapp/admin.py
+```python
+# yourapp/admin.py
 
-    from .reports import MyReport
-    from .models import MyModel
+from .reports import MyReport
+from .models import MyModel
 
-    reports.register(MyModel, MyReport)
-    ```
+reports.register(MyModel, MyReport)
+```
 
 Upon registration, you'll see a new action with the Django Admin for that Model,
 with whatever name you've provided in the `name` attribute.
@@ -78,33 +78,33 @@ CSV file is generated.
 It may be useful for you to test a report via code, either as a test or a quick
 shell script. This is done without much stress:
 
-    ```python
-    # Assuming a defined ModelReport
-    from reports.base import ModelReport
-    from .models import MyModel
+```python
+# Assuming a defined ModelReport
+from reports.base import ModelReport
+from .models import MyModel
 
-    class MyReport(ModelReport):
-        queryset = MyModel.objects.all()
+class MyReport(ModelReport):
+    queryset = MyModel.objects.all()
 
-    # Instantiate the report, and run it through various means
+# Instantiate the report, and run it through various means
 
-    report = MyReport()
+report = MyReport()
 
-    # Create a SavedReport instance
-    report.run_report()
+# Create a SavedReport instance
+report.run_report()
 
-    # Raw output of the report (as CSV, by default)
-    report.generate_output()
+# Raw output of the report (as CSV, by default)
+report.generate_output()
 
-    # Output list of OrderedDicts
-    report.collect_data()
-    ```
+# Output list of OrderedDicts
+report.collect_data()
+```
 
 ## Testing
 
 Tests are run using `pytest`, and the test suite can be executed using the
 MakeFile
 
-    ```sh
-    make test
-    ```
+```sh
+make test
+```
