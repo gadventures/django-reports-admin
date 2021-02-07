@@ -17,10 +17,10 @@ test_requirements = [
 setup(
     name="django-reports-admin",
     version=reports.__version__,
+    author=reports.__author__,
     description="A Django Admin add-on which adds functionality to export data in customized forms of output.",
     long_description=readme + "\n\n" + history,
     long_description_content_type="text/x-rst",
-    author="G Adventures",
     author_email="software@gadventures.com",
     url="https://github.com/gadventures/django-reports-admin",
     packages=find_packages(),
