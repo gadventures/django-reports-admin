@@ -1,4 +1,4 @@
-Django==1.10.8        # only (officially) supported version
+Django==1.11.29        # only (officially) supported version
 pytest==3.0.6         # latest release at project init
 pytest-django==3.1.2  # latest release at project init
 
