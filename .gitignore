@@ -3,6 +3,10 @@
 *.egg-info
 __pycache__
 dist
+.cache
 
 # extensions
 *.pyc
+
+# python version (pyenv)
+.python-version
