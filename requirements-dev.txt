@@ -1,5 +1,4 @@
-Django==1.10.8        # only (officially) supported version
-pytest==3.0.6         # latest release at project init
-pytest-django==3.1.2  # latest release at project init
-
+Django==2.2.22        # latest LTS release
+pytest==6.2.4         # latest release for py35
+pytest-django==4.2.0
 twine                 # for checking dist validity

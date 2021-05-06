@@ -10,8 +10,8 @@ forms of output.
 Requirements
 ------------
 
-Django Reports Admin requires ``Django 1.10.8`` or later, and is written
-for ``Python 3.5`` or later.
+Django Reports Admin requires ``Django 2.2.21`` or later, and is written
+for ``Python 3.6`` or later.
 
 Installation
 ------------
