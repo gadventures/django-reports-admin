@@ -9,9 +9,9 @@ readme = open("README.rst").read()
 history = open("HISTORY.rst").read()
 
 test_requirements = [
-    "Django==1.10.8",
-    "pytest==3.0.6",
-    "pytest-django==3.1.2",
+    "Django==2.2.21",
+    "pytest==6.2.4",
+    "pytest-django==4.2.0",
 ]
 
 setup(
@@ -33,7 +33,6 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
     ],
     tests_require=test_requirements,
